@@ -10,123 +10,36 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 
-# Nome do arquivo padrão
-DEFAULT_FILE = "CAN_DataChunks/JUMPY_0_20_5x.csv"
-global df, flag
-global_filtered_df = None
-
-
-# def transform_column_to_single_row(df, byte_index):
-#     if df is None or df.empty:
-#         messagebox.showwarning("Aviso", "DataFrame está vazio ou não foi fornecido.")
-#         return None
-#
-#     try:
-#         # Construir o nome da coluna com base no índice fornecido
-#         byte_column = f'byte_{byte_index}'
-#
-#         # Verificar se a coluna existe no DataFrame
-#         if byte_column in df.columns:
-#             # Somar os valores da coluna especificada e transformar em uma única linha
-#             single_row = pd.DataFrame({byte_column: [df[byte_column].sum()]})
-#
-#             # Retornar a linha única resultante
-#             return single_row
-#         else:
-#             messagebox.showwarning("Aviso", f"A coluna {byte_column} não existe no DataFrame.")
-#             return None
-#     except Exception as e:
-#         messagebox.showerror("Erro", f"Erro ao transformar a coluna em uma única linha: {str(e)}")
-#         return None
-
-#
-# def load_default_dataframe():
-#     if os.path.exists(DEFAULT_FILE):
-#         try:
-#             global df
-#             df = pd.read_csv(DEFAULT_FILE)
-#             messagebox.showinfo("Informação", f"Arquivo {DEFAULT_FILE} carregado automaticamente.")
-#             return True
-#         except Exception as e:
-#             messagebox.showerror("Erro", f"Erro ao carregar o arquivo padrão: {str(e)}")
-#             return False
-#     return False
-
-#
-# def load_dataframe():
-#     file_path = filedialog.askopenfilename(
-#         title="Selecione o arquivo CSV para carregar",
-#         filetypes=(("CSV files", "*.csv"), ("All files", "*.*"))
-#     )
-#
-#     if file_path:
-#         try:
-#             global df
-#             df = pd.read_csv(file_path)
-#             status_label.config(text="Dataframe filtrado carregado")
-#             messagebox.showinfo("Sucesso", "DataFrame carregado com sucesso!")
-#         except Exception as e:
-#             messagebox.showerror("Erro", f"Erro ao carregar o arquivo: {str(e)}")
-#     else:
-#         messagebox.showwarning("Aviso", "Nenhum arquivo selecionado.")
-
-#
-# def analyse_archive(df, model):
-#     best_pgns = []
-#
-#     for pgn in df['pgn'].unique():  # Assumindo que 'pgn' é uma coluna que identifica cada sequência
-#         df_pgn = df[df['pgn'] == pgn].copy()  # Filtra o DataFrame para o pgn atual
-#
-#         for i in range(8):  # Assumindo que cada dado tem 8 bytes
-#             byte_column = f'byte_{i}'
-#
-#             # Transformar a coluna de bytes em lista
-#             df_pgn[byte_column] = df_pgn['data'].apply(lambda x: int(x[i], 16))
-#
-#             # Obter valores de byte e processá-los
-#             X = df_pgn[byte_column].values
-#             # peaks, troughs = count_peaks_and_troughs(byte_values)
-#             #
-#             # if len(peaks) <= 6 and len(troughs) <= 6:
-#             #     # Preparar X e y para treinamento
-#             #     X = df_pgn.drop(columns=['event_time', 'dummy_feature', 'data', 'pgn'])  # Ignora as colunas não relevantes
-#             #     y = df_pgn[byte_column].values
-#
-#             if len(X) > 1:  # Garantir que temos dados suficientes e mais de uma classe
-#                 # Treinar o modelo para este byte específico
-#                 #model = train_sequence_model(df_pgn, i)
-#                 y_pred = model.predict(X)
-#
-#                 # Calcular acurácia
-#                 accuracy = accuracy_score(y, y_pred)
-#
-#                 # Armazenar os melhores pgns
-#                 best_pgns.append((pgn, i, accuracy, y_pred, X, y))
-#
-#     # return best_pgns
-
 def use_model():
     global df
     global model
 
-    model_filename = 'model1.pkl'
-    scaler_filename = 'scaler.pkl'
+    model_filename = 'meu_modelo.pkl'
 
     # Verificar se o modelo salvo já existe
-    if os.path.exists(model_filename):
-        print("Modelo encontrado. Carregando...")
-        model, scaler = load_model(model_filename, scaler_filename)
-        messagebox.showinfo("Ação", "Usando o modelo de Machine Learning...")
+    df = ui_load_ixxt_archive('JUMPY 2024/limpador_vel1_5x_jumpy.CSV')
 
-        similar_sequences = find_sequences(df, model, scaler)
+    model = carregar_modelo("meu_modelo.pkl")
 
-        # Exibindo as sequências mais similares
-        for sequence in similar_sequences:
-            print(f"PGN: {sequence[0]}, Byte: {sequence[1]}, Start Index: {sequence[2]}, Similarity: {sequence[3]}")
+    # Etapa 1: Analisar o DataFrame e coletar dados após descartar PGNs constantes
+    data_df = analyse_archive(df)
 
-        plot_best_sequences(labeled_df, similar_sequences, n_timesteps=250, top_n=5)
-    else:
-        print("Modelo não encontrado. Treinando novo modelo...")
+    # Etapa 2: Ajustar as sequências para o tamanho desejado
+    validated_df = prepare_sequences(data_df, target_size=1200)
+
+    # Etapa 3: Classificar as sequências usando o modelo
+    classified_df = classify_sequences(model, validated_df)
+
+    # Etapa 4: Aplicar a validação de picos
+    final_results_df = validate_peaks(classified_df)
+
+    # Opcional: Exibir os resultados finais
+    print("\nResultados finais após validação de picos:")
+    for index, row in final_results_df.iterrows():
+        print(
+            f"PGN: {row['pgn']}, Byte: {row['byte_column']}, Acurácia: {row['accuracy']}, Número de Picos: {row['num_peaks']}")
+
+    plot_best_pgns(final_results_df)
 
 
 
@@ -236,53 +149,6 @@ def save_raw_dataframe():
         messagebox.showinfo("Sucesso", "DataFrame salvo com sucesso!")
 
 
-def ui_load_ixxt_archive():
-    file_path = filedialog.askopenfilename(
-        title="Selecione o arquivo CSV",
-        filetypes=(("CSV files", "*.CSV"), ("all files", "*.*"))
-    )
-    if file_path:
-        global df
-        status_label.config(text="Carregando arquivo, por favor, aguarde...")
-        root.update_idletasks()  # Atualiza a tela para mostrar a mensagem de carregamento
-
-        df = fileToDataframe(file_path)  # Simulação do carregamento de dados
-        status_label.config(text="Arquivo ixxt carregado com sucesso!")
-        root.update()  # Atualiza a tela para refletir a mudança de status
-
-        messagebox.showinfo("Informação", "Arquivo carregado com sucesso!")
-
-# Função para visualizar os dados
-
-def plot_best_sequences(df, similar_sequences, n_timesteps=250, top_n=5):
-    """
-    Plota as melhores sequências com base nas similaridades calculadas.
-
-    Parâmetros:
-    - df: DataFrame original que contém os dados.
-    - similar_sequences: Lista de tuplas com informações das sequências mais similares (pgn, byte_index, start_index, similarity).
-    - n_timesteps: Número de timesteps em cada sequência.
-    - top_n: Número de melhores sequências para plotar.
-    """
-    # Seleciona as top_n sequências mais similares
-    top_sequences = similar_sequences[:top_n]
-
-    plt.figure(figsize=(15, 10))
-
-    for i, (pgn, byte_index, start_index, similarity) in enumerate(top_sequences):
-        byte_column = f'byte_{byte_index}'
-        sequence = df[df['pgn'] == pgn].iloc[start_index:start_index + n_timesteps][byte_column].values
-
-        plt.subplot(top_n, 1, i + 1)
-        plt.plot(range(start_index, start_index + n_timesteps), sequence, marker='o', linestyle='-', color='blue')
-        plt.title(f'Sequence for PGN {pgn} - Byte {byte_index} (Similarity: {similarity:.2f})')
-        plt.xlabel('Index')
-        plt.ylabel('Byte Value')
-        plt.grid(True)
-
-    plt.tight_layout()
-    plt.show()
-
 def vizData():
     global df
     if df is None:
@@ -335,26 +201,8 @@ def create_dropdown_menu(root, file_list):
 
 
 def train_model_button():
-    global labeled_df
-    byte = int(byte_entry.get())
 
-    # Verificar se o DataFrame filtrado global existe e não está vazio
-    if global_filtered_df is None or global_filtered_df.empty:
-        messagebox.showwarning("Verificação", "Nenhum dado filtrado disponível. Por favor, aplique os filtros primeiro.")
-        return
-
-    # Definir parâmetros para o treinamento do modelo
-    n_timesteps = 500
-
-    train_sequence_model(labeled_df, byte)
-    # Treinar o modelo com base nos dados filtrados
-    #model = train_sequence_model(filtered_df, byte_filter)
-    #loss = list()
-
-        #loss.append(hist.history['loss'][0])
-        #print(global_filtered_df.head(), len(global_filtered_df))
-
-    return
+    return None
 
 
 def on_filter_and_label():
@@ -406,9 +254,16 @@ def main():
     button_frame = tk.Frame(root)
     button_frame.pack(pady=10)
 
-    # Botão "Carregar dados"
-    btn_load = tk.Button(button_frame, text="Carregar ixxt csv", command=ui_load_ixxt_archive, width=button_width, height=button_height, bg=button_bg_color,
-                         fg="white")
+    btn_load = tk.Button(
+        button_frame,
+        text="Carregar ixxt csv",
+        command=ui_load_ixxt_archive,
+        width=button_width,
+        height=button_height,
+        bg=button_bg_color,
+        fg="white"
+    )
+
     btn_load.pack(side=tk.LEFT, padx=5)
 
     # Botão "Salvar Dados brutos"
@@ -450,8 +305,12 @@ def main():
     pgn_entry = tk.Entry(pgn_frame, width=15, **entry_style)
     pgn_entry.pack()
 
+    train_button = tk.Button(button_frame, text="BUSCAR SEQUENCIAS", command=use_model, width=button_width, height=button_height, bg=button_bg_color, fg="white")
+    train_button.pack(side=tk.LEFT, padx=5)
+
     # Frame para os botões de filtragem
     filtered_button_frame = tk.Frame(root)
+
     filtered_button_frame.pack(pady=15)
 
     # Visualizar dados
@@ -494,9 +353,6 @@ def main():
     # Adicionando o botão para carregar o modelo
     load_button = tk.Button(button_frame, text="Carregar Modelo", command=load_model_via_button)
     load_button.pack(side=tk.LEFT, padx=10)
-
-    train_button = tk.Button(button_frame, text="BUSCAR SEQUENCIAS", command=use_model, width=button_width, height=button_height, bg=button_bg_color, fg="white")
-    train_button.pack(side=tk.LEFT, padx=5)
 
     root.mainloop()
 

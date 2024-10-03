@@ -239,3 +239,64 @@ def save_df_raw(df):
         messagebox.showinfo("Sucesso", "DataFrame salvo com sucesso!")
 
 
+
+
+
+    # def ui_load_ixxt_archive(self):
+    #     file_path = filedialog.askopenfilename(
+    #         title="Selecione o arquivo CSV",
+    #         filetypes=(("CSV files", "*.CSV;*.csv"), ("All files", "*.*"))
+    #     )
+    #
+    #     if file_path:
+    #         df = self.ixxt_filetodataframe(file_path)
+    #         if df is not None:
+    #             df_normalizado = self.normalizar_dataframe(df)
+    #             if df_normalizado is not None:
+    #                 messagebox.showinfo("Sucesso", f"Arquivo '{file_path}' carregado e normalizado com sucesso!")
+    #                 self.exibir_dataframe(df_normalizado)
+    #     else:
+    #         messagebox.showwarning("Aviso", "Nenhum arquivo foi selecionado.")
+
+
+
+
+
+    # def use_model(self):
+    #     if self.ixxt_data is None:
+    #         messagebox.showwarning("Aviso", "Nenhum dado carregado para usar o modelo.")
+    #         return
+    #
+    #     model_filename = 'meu_modelo.pkl'
+    #
+    #     # Carregar o modelo
+    #     model = self.carregar_modelo(self, model_filename)
+    #     if model is None:
+    #         return
+    #
+    #     # Etapa 1: Analisar o DataFrame e coletar dados após descartar PGNs constantes
+    #     data_df = self.analyse_archive(self.ixxt_data)
+    #
+    #     # Etapa 2: Ajustar as sequências para o tamanho desejado
+    #     validated_df = prepare_sequences(data_df, target_size=1200)
+    #
+    #     # Etapa 3: Classificar as sequências usando o modelo
+    #     classified_df = classify_sequences(model, validated_df)
+    #
+    #     # Etapa 4: Aplicar a validação de picos
+    #     final_results_df = validate_peaks(classified_df)
+    #
+    #     # Armazenar os resultados finais
+    #     self.best_results = final_results_df
+    #
+    #     # Exibir os resultados finais no terminal
+    #     print("\nResultados finais após validação de picos:")
+    #     for index, row in final_results_df.iterrows():
+    #         print(
+    #             f"PGN: {row['pgn']}, Byte: {row['byte_column']}, Acurácia: {row['accuracy']}, Número de Picos: {row['num_peaks']}")
+    #
+    #     # Plotar os melhores PGNs dentro do Tkinter
+    #     self.plot_best_pgns(final_results_df)
+    #
+    #     # Exibir o DataFrame final na interface
+    #     self.exibir_dataframe(final_results_df)

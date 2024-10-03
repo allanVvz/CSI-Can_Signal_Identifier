@@ -137,3 +137,8 @@ def count_peaks_and_troughs(data):
             troughs.append(data[i])
     return peaks, troughs
 
+
+
+
+
+
