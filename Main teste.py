@@ -22,6 +22,14 @@ class AplicacaoCSV:
         # Chamar método para criar o menu drop-down
         self.create_menu_dropdown()
 
+        # Frame para exibir informações ou gráficos
+        self.content_frame = ttk.Frame(self.master)
+        self.content_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Frame para navegação de gráficos
+        self.navigation_frame = ttk.Frame(self.master)
+        self.navigation_frame.pack(pady=5)
+
         # Frame para os botões
         self.button_frame = ttk.Frame(self.master)
         self.button_frame.pack(pady=10)
@@ -101,7 +109,7 @@ class AplicacaoCSV:
         )
         self.plot_title.pack(side=tk.LEFT, padx=10)
 
-
+#-----------------------------------------------------------------------#
 
     def create_menu_dropdown(self):
         directory = "CAN_DataChunks"  # Diretório onde os arquivos CSV estão armazenados
@@ -115,6 +123,7 @@ class AplicacaoCSV:
         # Cria o menu drop-down com a lista de arquivos e a função de callback para carregar o arquivo
         self.create_dropdown_menu(file_list)
 
+
     def create_dropdown_menu(self, file_list):
         selected_file = tk.StringVar(self.master)
         selected_file.set(file_list[0])  # Definir o primeiro arquivo como padrão
@@ -127,12 +136,14 @@ class AplicacaoCSV:
         load_button = tk.Button(self.master, text="Carregar Arquivo", command=lambda: self.load_file_callback(selected_file.get()))
         load_button.pack(pady=10)
 
+
     def load_file_callback(self, selected_file):
         df = load_selected_file(selected_file)
         if df is not None:
             self.can_data = df  # Armazena o DataFrame carregado
             self.nome_arquivo = selected_file  # Atualiza o nome do arquivo
             self.master.title(f"Aplicação CSV - {self.nome_arquivo}")  # Atualiza o título da janela
+
 
     def exibir_dataframe(self):
         for widget in self.content_frame.winfo_children():
@@ -149,6 +160,7 @@ class AplicacaoCSV:
         scrollbar_x = ttk.Scrollbar(self.content_frame, orient=tk.HORIZONTAL, command=text.xview)
         scrollbar_x.pack(side=tk.BOTTOM, fill=tk.X)
         text.config(xscrollcommand=scrollbar_x.set)
+
 
     def plotar_grafico(self):
         if self.can_data is None:
@@ -197,6 +209,7 @@ class AplicacaoCSV:
         # Exibir os resultados finais no terminal
         self.exibir_resultados_finais(final_results_df)
 
+
     def exibir_resultados_finais(self, final_results_df):
 
         if final_results_df is None or final_results_df.empty:
@@ -208,6 +221,7 @@ class AplicacaoCSV:
             print(
                 f"PGN: {row['pgn']}, Byte: {row['byte_column']}, Acurácia: {row['accuracy']}, Número de Picos: {row['num_peaks']}"
             )
+
 
     def carregar_modelo(self, nome_arquivo):
         try:
@@ -223,24 +237,6 @@ class AplicacaoCSV:
             return None
 
 
-
-    # def plot_best_pgns(self):
-    #     self.current_plot_index = 0
-    #     for index, row in self.best_results.iterrows():
-    #         pgn = row['pgn']
-    #         byte_column = row['byte_column']
-    #         accuracy = row['accuracy']
-    #         sequence = row['sequence'].flatten()  # Ensure sequence is 1D
-    #
-    #         plt.figure(figsize=(10, 6))
-    #         plt.plot(sequence, label=f"PGN {pgn}, {byte_column} (Acurácia: {accuracy:.2f})")
-    #         plt.xlabel('Timestep')
-    #         plt.ylabel('Valor')
-    #         plt.title(f"Melhor sequência para PGN {pgn}, {byte_column}")
-    #         plt.legend()
-    #         plt.show()
-    # Adicionar ou modificar o código abaixo
-
     def plot_best_pgns(self):
         """
         Exibe o primeiro gráfico da lista de best_results dentro do Tkinter e no terminal para debug.
@@ -250,12 +246,13 @@ class AplicacaoCSV:
             messagebox.showwarning("Aviso", "Nenhum resultado disponível para plotar.")
             return
 
-        # --- Limpar o conteúdo anterior ---
-        for widget in self.content_frame.winfo_children():
-            widget.destroy()
+        # # --- Limpar o conteúdo anterior ---
+        # for widget in self.content_frame.winfo_children():
+        #     widget.destroy()
 
-        self.current_plot_index = 0  # Começar com o primeiro gráfico
+        # self.current_plot_index = 0  # Começar com o primeiro gráfico
         self.display_current_plot()  # Exibe o primeiro gráfico
+
 
     def display_current_plot(self):
         """
@@ -304,7 +301,7 @@ class AplicacaoCSV:
         self.plot_title.config(text=f"Gráfico {self.current_plot_index + 1} de {len(self.best_results)}")
 
     def show_prev_plot(self):
-        if not self.best_results:
+        if self.best_results.empty:  # Use .empty para verificar se o DataFrame está vazio
             return
         if self.current_plot_index > 0:
             self.current_plot_index -= 1
@@ -312,8 +309,9 @@ class AplicacaoCSV:
         else:
             messagebox.showinfo("Informação", "Este é o primeiro gráfico.")
 
+
     def show_next_plot(self):
-        if not self.best_results:
+        if self.best_results.empty:  # Use .empty para verificar se o DataFrame está vazio
             return
         if self.current_plot_index < len(self.best_results) - 1:
             self.current_plot_index += 1
