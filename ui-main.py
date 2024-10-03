@@ -173,8 +173,18 @@ class AplicacaoCSV:
 
     def chamar_gerar_pdf(self):
         try:
-            gerar_pdf_com_graficos(self.best_results, pdf_filename="graficos_pgn.pdf")
-            messagebox.showinfo("Sucesso", "PDF gerado com sucesso!")
+            # Abrir diálogo para o usuário escolher o nome e o local do arquivo PDF
+            pdf_filename = filedialog.asksaveasfilename(
+                defaultextension=".pdf",
+                filetypes=[("PDF files", "*.pdf"), ("All files", "*.*")],
+                title="Salvar PDF dos Gráficos"
+            )
+
+            if pdf_filename:
+                gerar_pdf_com_graficos(self.best_results, pdf_filename=pdf_filename)
+                messagebox.showinfo("Sucesso", f"PDF gerado com sucesso em {pdf_filename}!")
+            else:
+                messagebox.showwarning("Cancelado", "A operação de salvar foi cancelada.")
         except ValueError as e:
             messagebox.showerror("Erro", str(e))
 
