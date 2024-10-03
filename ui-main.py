@@ -11,7 +11,7 @@ class AplicacaoCSV:
     def __init__(self, master):
         self.master = master
         self.master.title("Aplicação CSV")  # Título inicial da janela
-        self.master.geometry("800x600")
+        self.master.geometry("700x450")  # Definindo formato vertical (600x800)
 
         self.can_data = None
         self.best_results = []  # Lista para armazenar os DataFrames de resultados finais
@@ -19,72 +19,86 @@ class AplicacaoCSV:
         self.nome_arquivo = None  # Variável para armazenar o nome do arquivo analisado
         self.canvas = None  # Variável para o canvas do gráfico
 
-        # Chamar método para criar o menu drop-down
-        self.create_menu_dropdown()
+        # Definir cores
+        dark_gray = "#333333"
+        light_gray = "#CCCCCC"
+
+        # Configurar fundo da tela
+        self.master.configure(bg=light_gray)
+
+        # Frame para o cabeçalho fixo
+        self.header_frame = tk.Frame(self.master, width=500, height=100, bg=dark_gray)
+        self.header_frame.pack_propagate(0)  # Manter a altura fixa
+        self.header_frame.pack(side=tk.TOP, fill=tk.X)
 
         # Frame para exibir informações ou gráficos
-        self.content_frame = ttk.Frame(self.master)
-        self.content_frame.pack(fill=tk.BOTH, expand=True)
+        self.content_frame = tk.Frame(self.master, bg=light_gray)
+        self.content_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # Frame para navegação de gráficos
-        self.navigation_frame = ttk.Frame(self.master)
-        self.navigation_frame.pack(pady=5)
-
-        # Frame para os botões
-        self.button_frame = ttk.Frame(self.master)
-        self.button_frame.pack(pady=10)
-
-        # Frame para exibir informações ou gráficos
-        self.content_frame = ttk.Frame(self.master)
-        self.content_frame.pack(fill=tk.BOTH, expand=True)
-
-        # Frame para navegação de gráficos
-        self.navigation_frame = ttk.Frame(self.master)
-        self.navigation_frame.pack(pady=5)
+        self.navigation_frame = tk.Frame(self.master, width=500, height=100, bg=dark_gray)
+        self.navigation_frame.pack_propagate(0)  # Manter a altura fixa
+        self.navigation_frame.pack(side=tk.BOTTOM, fill=tk.X)
 
         # Botão "Carregar dados"
         self.btn_load = tk.Button(
-            self.button_frame,
+            self.header_frame,
             text="Carregar ixxt csv",
             command=lambda: ui_load_ixxt_archive(self),
-            width=20,
+            width=15,
             height=2,
             bg="#4CAF50",
             fg="white"
         )
         self.btn_load.pack(side=tk.LEFT, padx=5)
 
-        # Botão "Plotar Gráfico"
-        self.btn_plot = tk.Button(
-            self.button_frame,
-            text="Plotar Gráfico",
-            command=self.plotar_grafico,
-            width=20,
+        # Chamar método para criar o menu drop-down e botão Carregar Arquivo
+        self.create_dropdown_menu_in_header()
+
+        # Botão "Carregar dados"
+        self.btn_load = tk.Button(
+            self.header_frame,
+            text="Carregar Arquivo",
+            command=lambda: self.load_file_callback(self.selected_file.get()),
+            width=15,
             height=2,
-            bg="#2196F3",
+            bg="#4CAF50",
             fg="white"
         )
-        self.btn_plot.pack(side=tk.LEFT, padx=5)
+        self.btn_load.pack(side=tk.LEFT, padx=5)
+
 
         # Botão "Usar Modelo"
         self.btn_model = tk.Button(
-            self.button_frame,
+            self.header_frame,
             text="Usar Modelo",
             command=self.use_model,
-            width=20,
+            width=15,
             height=2,
             bg="#FF9800",
             fg="white"
         )
         self.btn_model.pack(side=tk.LEFT, padx=5)
 
-        # Botões de navegação de gráficos
+        # Botão "Plotar Gráfico"
+        self.btn_plot = tk.Button(
+            self.header_frame,
+            text="Plotar Gráfico",
+            command=self.plotar_grafico,
+            width=15,
+            height=2,
+            bg="#2196F3",
+            fg="white"
+        )
+        self.btn_plot.pack(side=tk.RIGHT, padx=5)
+
+        # Botões de navegação de gráficos (no rodapé)
         self.btn_prev = tk.Button(
             self.navigation_frame,
             text="Anterior",
             command=self.show_prev_plot,
-            width=10,
-            height=1,
+            width=12,
+            height=2,
             bg="#9E9E9E",
             fg="white"
         )
@@ -94,8 +108,8 @@ class AplicacaoCSV:
             self.navigation_frame,
             text="Próximo",
             command=self.show_next_plot,
-            width=10,
-            height=1,
+            width=12,
+            height=2,
             bg="#9E9E9E",
             fg="white"
         )
@@ -105,23 +119,30 @@ class AplicacaoCSV:
         self.plot_title = tk.Label(
             self.navigation_frame,
             text="Nenhum gráfico carregado",
-            font=("Helvetica", 12)
+            font=("Helvetica", 12),
+            bg=light_gray
         )
         self.plot_title.pack(side=tk.LEFT, padx=10)
 
 #-----------------------------------------------------------------------#
 
-    def create_menu_dropdown(self):
+    def create_dropdown_menu_in_header(self):
         directory = "CAN_DataChunks"  # Diretório onde os arquivos CSV estão armazenados
 
         # Filtra apenas arquivos CSV no diretório
         file_list = [f for f in os.listdir(directory) if f.endswith('.csv')]
         if not file_list:
             messagebox.showwarning("Aviso", "Nenhum arquivo CSV encontrado.")
-            return
+            file_list = [""]  # Evitar erro se não houver arquivos
 
-        # Cria o menu drop-down com a lista de arquivos e a função de callback para carregar o arquivo
-        self.create_dropdown_menu(file_list)
+        # Variável para armazenar o arquivo selecionado
+        self.selected_file = tk.StringVar(self.master)
+        self.selected_file.set(file_list[0])  # Definir o primeiro arquivo como padrão
+
+        # Menu suspenso para seleção de arquivos
+        dropdown = tk.OptionMenu(self.header_frame, self.selected_file, *file_list)
+        dropdown.config(width=20)
+        dropdown.pack(side=tk.LEFT, padx=5, pady=20)
 
 
     def create_dropdown_menu(self, file_list):
@@ -219,7 +240,7 @@ class AplicacaoCSV:
         print("\nResultados finais após validação de picos:")
         for index, row in final_results_df.iterrows():
             print(
-                f"PGN: {row['pgn']}, Byte: {row['byte_column']}, Acurácia: {row['accuracy']}, Número de Picos: {row['num_peaks']}"
+                f"PGN: {row['pgn']}, {row['byte_column']}, Acurácia: {row['accuracy']}, Número de Picos: {row['num_peaks']}"
             )
 
 
@@ -276,7 +297,7 @@ class AplicacaoCSV:
 
         # --- Plotar o gráfico no terminal para debug ---
         print(f"PGN {pgn}, Byte {byte_column}, Acurácia {accuracy}")
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(5, 3))
         plt.plot(sequence, label=f"PGN {pgn}, Byte {byte_column} (Acurácia: {accuracy:.2f})")
         plt.xlabel('Timestep')
         plt.ylabel('Valor')
