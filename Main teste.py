@@ -4,6 +4,7 @@ import os
 import pandas as pd
 from data_engine import *
 from matplotlib import pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # Adicionando para integração de gráficos no Tkinter
 
 
 class AplicacaoCSV:
@@ -16,6 +17,7 @@ class AplicacaoCSV:
         self.best_results = []  # Lista para armazenar os DataFrames de resultados finais
         self.current_plot_index = 0  # Índice do gráfico atual
         self.nome_arquivo = None  # Variável para armazenar o nome do arquivo analisado
+        self.canvas = None  # Variável para o canvas do gráfico
 
         # Chamar método para criar o menu drop-down
         self.create_menu_dropdown()
@@ -220,21 +222,86 @@ class AplicacaoCSV:
             print(f"Erro ao carregar o modelo: {e}")
             return None
 
-    def plot_best_pgns(self):
-        self.current_plot_index = 0
-        for index, row in self.best_results.iterrows():
-            pgn = row['pgn']
-            byte_column = row['byte_column']
-            accuracy = row['accuracy']
-            sequence = row['sequence'].flatten()  # Ensure sequence is 1D
 
-            plt.figure(figsize=(10, 6))
-            plt.plot(sequence, label=f"PGN {pgn}, {byte_column} (Acurácia: {accuracy:.2f})")
-            plt.xlabel('Timestep')
-            plt.ylabel('Valor')
-            plt.title(f"Melhor sequência para PGN {pgn}, {byte_column}")
-            plt.legend()
-            plt.show()
+
+    # def plot_best_pgns(self):
+    #     self.current_plot_index = 0
+    #     for index, row in self.best_results.iterrows():
+    #         pgn = row['pgn']
+    #         byte_column = row['byte_column']
+    #         accuracy = row['accuracy']
+    #         sequence = row['sequence'].flatten()  # Ensure sequence is 1D
+    #
+    #         plt.figure(figsize=(10, 6))
+    #         plt.plot(sequence, label=f"PGN {pgn}, {byte_column} (Acurácia: {accuracy:.2f})")
+    #         plt.xlabel('Timestep')
+    #         plt.ylabel('Valor')
+    #         plt.title(f"Melhor sequência para PGN {pgn}, {byte_column}")
+    #         plt.legend()
+    #         plt.show()
+    # Adicionar ou modificar o código abaixo
+
+    def plot_best_pgns(self):
+        """
+        Exibe o primeiro gráfico da lista de best_results dentro do Tkinter e no terminal para debug.
+        """
+        # --- Verificar se o DataFrame está vazio ---
+        if self.best_results.empty:
+            messagebox.showwarning("Aviso", "Nenhum resultado disponível para plotar.")
+            return
+
+        # --- Limpar o conteúdo anterior ---
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
+
+        self.current_plot_index = 0  # Começar com o primeiro gráfico
+        self.display_current_plot()  # Exibe o primeiro gráfico
+
+    def display_current_plot(self):
+        """
+        Exibe o gráfico atual da lista de best_results dentro da interface Tkinter.
+        """
+        # --- Verificar se o DataFrame está vazio ---
+        if self.best_results.empty or self.current_plot_index < 0 or self.current_plot_index >= len(self.best_results):
+            messagebox.showwarning("Aviso", "Nenhum gráfico para exibir.")
+            return
+
+        # --- Limpar o frame de conteúdo ---
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
+
+        # Obtém os dados do gráfico atual
+        row = self.best_results.iloc[self.current_plot_index]
+        pgn = row['pgn']
+        byte_column = row['byte_column']
+        accuracy = row['accuracy']
+        sequence = row['sequence'].flatten()  # Certifique-se de que a sequência é 1D
+
+        # --- Plotar o gráfico no terminal para debug ---
+        print(f"PGN {pgn}, Byte {byte_column}, Acurácia {accuracy}")
+        plt.figure(figsize=(10, 6))
+        plt.plot(sequence, label=f"PGN {pgn}, Byte {byte_column} (Acurácia: {accuracy:.2f})")
+        plt.xlabel('Timestep')
+        plt.ylabel('Valor')
+        plt.title(f"Melhor sequência para PGN {pgn}, Byte {byte_column}")
+        plt.legend()
+        plt.show()  # Mantém a plotagem no terminal para debug
+
+        # --- Criar a figura para o Tkinter ---
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.plot(sequence, label=f"PGN {pgn}, Byte {byte_column} (Acurácia: {accuracy:.2f})")
+        ax.set_xlabel('Timestep')
+        ax.set_ylabel('Valor')
+        ax.set_title(f"Melhor sequência para PGN {pgn}, Byte {byte_column}")
+        ax.legend()
+
+        # --- Exibir o gráfico no Tkinter ---
+        self.canvas = FigureCanvasTkAgg(fig, master=self.content_frame)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+        # Atualizar o título do gráfico
+        self.plot_title.config(text=f"Gráfico {self.current_plot_index + 1} de {len(self.best_results)}")
 
     def show_prev_plot(self):
         if not self.best_results:
