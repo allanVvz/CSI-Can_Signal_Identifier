@@ -124,7 +124,59 @@ class AplicacaoCSV:
         )
         self.plot_title.pack(side=tk.LEFT, padx=10)
 
+        # Botão para gerar PDF
+        self.btn_pdf = tk.Button(
+            self.navigation_frame,
+            text="Gerar PDF",
+            command=self.chamar_gerar_pdf,  # Função para chamar o método de gerar PDF
+            width=20,
+            height=2,
+            bg="#FF9800",
+            fg="black"
+        )
+        self.btn_pdf.pack(side=tk.LEFT, pady=5)
+
+        # Adicionar botão verde no footer para salvar os dados brutos
+        self.btn_save_raw = tk.Button(
+            self.navigation_frame,
+            text="Salvar Dados Brutos",
+            command=self.salvar_dados_brutos,  # Chama a função de salvar os dados brutos
+            width=20,
+            height=2,
+            bg="#4CAF50",  # Cor verde
+            fg="white"
+        )
+        self.btn_save_raw.pack(side=tk.RIGHT, padx=5)
+
 #-----------------------------------------------------------------------#
+
+    def salvar_dados_brutos(self):
+        if self.can_data is None:
+            messagebox.showwarning("Aviso", "Nenhum dado carregado para salvar.")
+        else:
+            try:
+                # Abrir diálogo para o usuário escolher o nome e o local do arquivo
+                file_path = filedialog.asksaveasfilename(
+                    defaultextension=".csv",
+                    filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+                    title="Salvar Dados Brutos"
+                )
+
+                if file_path:
+                    # Salvar o DataFrame bruto no caminho especificado
+                    self.can_data.to_csv(file_path, index=False)
+                    messagebox.showinfo("Sucesso", f"Dados brutos salvos com sucesso em {file_path}!")
+                else:
+                    messagebox.showwarning("Cancelado", "A operação de salvar foi cancelada.")
+            except Exception as e:
+                messagebox.showerror("Erro", f"Erro ao salvar os dados brutos: {str(e)}")
+
+    def chamar_gerar_pdf(self):
+        try:
+            gerar_pdf_com_graficos(self.best_results, pdf_filename="graficos_pgn.pdf")
+            messagebox.showinfo("Sucesso", "PDF gerado com sucesso!")
+        except ValueError as e:
+            messagebox.showerror("Erro", str(e))
 
     def create_dropdown_menu_in_header(self):
         directory = "CAN_DataChunks"  # Diretório onde os arquivos CSV estão armazenados
