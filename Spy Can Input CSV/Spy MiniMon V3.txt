@@ -1,0 +1,30 @@
+MiniMon V3
+**********
+Para conectar com o SW a luz do USB deve estar acesa.
+
+Functions > Automatica Baud Detection = força discover da velocidade da CAN
+Padrão é 500kbps. Golf/Jetta padrão é 125kbps
+
+Functions > Start ou ícone verde
+
+Passos para o Spy:
+1) Functions > Stop ou ícone vermelho
+2) View > Clear ou F8
+3) Functions > Logging to File --> Salvar como NomedoCarro_Ano_SensorMonitorado
+4) Start para iniciar o Spy
+5) Excitar o sensor monitorado 5X
+6) Stop para parar o Spy
+7) Functions > Logging to File para parar de alimentar o arquivo
+8) Iniciar a partir do passo 2 para outro sensor
+
+Como excitar os sensores (sempre dar um intervalo de 5s entre a 3a e a 4a medição) 
+Velocidade pulso = 5 pulsos de 0km/h a 20km/h
+Velocidade onda = gerar uma onda de 0km/h até 20km/h (3s), após 40km (3s), após 20km/h (3s) - Inserir no nome do arquivo o hodômetro
+RPM pulso = Ligar o carro, deixar estabilizar em marcha lenta. Fazer 5 pulsos de marcha lenta a 2000RPM ou 3000RPM
+RPM pico = Fazer 1 pico de 5000RPM (3s) e anotar o valor desse pico
+Limpador = Ligar e desligar o limpador 5X na velocidade máxima com intervalos de 1s
+Farol = Iniciar a medição com o farol desligado, passar para a posição lantera e após fazer 5 pulsos entre lanterna e farol baixo ligado
+Freio = Fazer 5 pulsos pisando no freio
+Cinto de segurança = Iniciar com o cinto conectado e alterar 5X
+4X4 = Iniciar com o 4X4 desligado e alternar 5X entre posição low (aguardar o led)
+Embreagem = Fazer 5 pulsos pisando na embreagem

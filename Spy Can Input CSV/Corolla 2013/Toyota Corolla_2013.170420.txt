@@ -1,0 +1,272 @@
+//CAN Toyota - Corolla 2012
+
+>C19_ENA0<
+
+//Inicializa dados Captura CAN
+>S1900,0,0,0,0,FFFFFFFF,0,11<
+>S1901,0,0,0,0,FFFFFFFF,0,11<
+>S1902,0,0,0,0,FFFFFFFF,0,11<
+>S1903,0,0,0,0,FFFFFFFF,0,11<
+>S1904,0,0,0,0,FFFFFFFF,0,11<
+>S1905,0,0,0,0,FFFFFFFF,0,11<
+>S1906,0,0,0,0,FFFFFFFF,0,11<
+>S1907,0,0,0,0,FFFFFFFF,0,11<
+>S1908,0,0,0,0,FFFFFFFF,0,11<
+>S1909,0,0,0,0,FFFFFFFF,0,11<
+>S1910,0,0,0,0,FFFFFFFF,0,11<
+>S1911,0,0,0,0,FFFFFFFF,0,11<
+>S1912,0,0,0,0,FFFFFFFF,0,11<
+>S1913,0,0,0,0,FFFFFFFF,0,11<
+>S1914,0,0,0,0,FFFFFFFF,0,11<
+>S1915,0,0,0,0,FFFFFFFF,0,11<
+>S1916,0,0,0,0,FFFFFFFF,0,11<
+>S1917,0,0,0,0,FFFFFFFF,0,11<
+>S1918,0,0,0,0,FFFFFFFF,0,11<
+>S1919,0,0,0,0,FFFFFFFF,0,11<
+>S1920,0,0,0,0,FFFFFFFF,0,11<
+>S1921,0,0,0,0,FFFFFFFF,0,11<
+>S1922,0,0,0,0,FFFFFFFF,0,11<
+>S1923,0,0,0,0,FFFFFFFF,0,11<
+>S1924,0,0,0,0,FFFFFFFF,0,11<
+>S1925,0,0,0,0,FFFFFFFF,0,11<
+
+//---------------------------------------------------------------------------
+
+//*************
+//*    	RPM   *
+//*************
+
+//RPM PID: 0x2C4 (708d) - Bytes: 1 e 2
+>S1900,708,26,1,2,0000FFFF,0,11,000<
+ 
+//Converte o valor lido para RPM - CT27 é o RPM atual
+>SED213 TT00++ IN07++ SGN NN {SCT90 VCT26&HFF*256}{SCT90 |VCT26/256}<
+>SED214 TT00++ IN07++ SGN NN {SCT27 VCT90*77}{SCT27 /100}<
+
+//----------------------------------------------------------------------------
+
+//****************
+//* Velocidade   *
+//****************
+
+//Ganho: -- m/h/bit - Offset: 0 km/h
+//Velocidade PID 0x610 (1552d) Byte 3 (km/h)
+>S1901,1552,48,3,1,000000FF,0,11,000<
+//Ajuste 100,0% do valor da CAN
+>SCT05 1000< 
+
+//Converte o valor lido para RPM - CT64 é a velocidade atual (m/h)
+>SED211 TT00++ IN07++ SGN NN {SCT64 VCT48*VCT05}<
+>SED212U<
+
+//----------------------------------------------------------------------------
+
+//**************
+//*  Hodometro * 
+//**************
+
+//Hodometro PID 0x611 (1553d) Bytes 6, 7 e 8
+//Ganho: ---m/bit - Offset: 0 m
+>S1902,1553,49,6,3,00FFFFFF,0,11,000<
+
+//Converte o valor lido para RPM - CT01 é o hodometro atual (0,1km)
+
+>SED203 TT00++ IN07++ SGN NN {SCT89 VCT49&HFF*H10000}{SCT89 |VCT49&HFF00}<
+>SED204 TT00++ IN07++ SGN NN {SCT89 |VCT49/H10000}<
+>SED205 TT00++ IN07++ SGN NN {SCT28 VCT89*10}{GGRVCT28VCT01}{SCT01 VCT28}<
+
+>SCT01 0<
+
+//----------------------------------------------------------------------------
+
+//**************
+//*  Freada    *
+//**************
+
+>SED206 TT00++ IN07++ SGN NN {SCT76 VCT64-VCT75/1000}{SCT75 VCT64}<
+
+//----------------------------------------------------------------------------
+
+//***************************
+//*  Limpador Para-Brisa    *
+//***************************
+
+//Não possui
+//Irá utilizar a Discreta 3 (IN02)
+>SED70 IN02++ SG12++&&CL21++&&SG22-- SGN NN {SCC21 30}<   
+>SED71 TT00++ SG12++&&SG22++&&IN02++ SGN NN {SCC22 15}<
+>SED72 CC21-- IN02++ GF0 V0 {SCT10 VCT12}{SSH201}{SSH221}{SCC06 VCT06}{SCT88 |VCT16&8}<
+>SED73 TT00++ CL22++&&IN02--&&SG22++ GF0 V0 {SCT10 VCT11}{SSH201}{SSH220}{SCC06 VCT06}{SCT88 |VCT16&8}<
+>SED74 SG12++ +- SGN NN {SIT02005120_INV1}{SSH220}<
+>SED75 SG12-- +- SGN NN {SIT02003003_INV1}{SCT10 VCT11}{SSH220}<
+>SED76U<
+>SSH220<
+>SSH200<
+
+//----------------------------------------------------------------------------
+
+//*********************
+//*  Pedal do Freio   * 
+//*********************
+
+//Freio PID 3B4 (948d) Byte 5 Mascara: 0x01 
+// 0 -> Pedal desacionado
+// 1 -> Pedal Acionado
+>S1903,948,81,5,1,00000001,0,11,000<
+
+//----------------------------------------------------------------------------
+
+//************
+//*  Farol   *
+//************
+
+//Farol PID 390 (912d) Byte 7 Mascara: 0x01 
+// 0 -> Farol Desligado
+// 1 -> Farol Ligado
+>S1904,912,82,7,1,00000001,0,11,000<
+
+//----------------------------------------------------------------------------
+
+//*************************
+//*  Cinto de Segurança   *
+//*************************
+
+//não possui
+
+
+//----------------------------------------------------------------------------
+
+//********************
+//*   Faixas RPM     *
+//********************
+
+//Motor Girando
+>SUT15,QCT27,7,15,400,9999<	
+
+//RPM Marcha Lenta
+>SUT04,QCT27,7,15,400,1100<	
+>SED110 TT00++ UC04++ SGN NN {SCT20 +1}<
+
+//RPM Entre Faixas A
+>SUT05,QCT27,7,15,1101,1199<
+>SED111 TT00++ UC05++ SGN NN {SCT21 +1}<
+
+//RPM Faixa Verde
+>SUT09,QCT27,7,15,1200,4000<
+>SED112 TT00++ UC09++ SGN NN {SCT22 +1}<
+
+//RPM Entre Faixas B
+>SUT10,QCT27,7,15,4001,5499<
+>SED113 TT00++ UC10++ SGN NN {SCT23 +1}<
+
+//RPM Excesso
+>SUT13,QCT27,7,15,5500,9999<
+>SED114 TT00++ UC13++ SGN NN {SCT24 +1}<
+
+//RPM Faixa Verde Ext. (Freio Motor)
+>SUT16,QCT27,7,15,9999,9999<
+
+//RPM Ex. RPM Evento (Freio Motor)
+>SUT17,QCT27,7,15,9999,9999<
+
+//----------------------------------------------------------------------------
+
+//***************
+//* Freio Motor *
+//***************
+
+//Não aplicável
+>SED77U<
+>SED78U<
+
+//--------------------------------------------------------------------------
+
+//***************************************
+//*      Mensagens Personalizadas       *
+//*       Discretas Virtuais			*
+//*            Versão 0.3               *
+//***************************************
+
+>SUC00 PLN0.3,4,3 QGP,4,40 QUV01,9,44 QAD00,7,4 QAD,40,8 QCT64,7,6 QCT27,8,4 QCT01,7,8 QTB000,8,16<
+>SUC01 GVHVCT17,14,4 GVHVCT92,10,8 GVHVCT18,14,4 GVHVCT78,10,8 GVHVCT79,10,8 GVDVCT02/360,17,7<
+
+//02 - Reservada
+
+//03 - Ignição Ligada/Dallas
+>SUC03 QUV00,9,147<
+
+//04 - Ignição Desligada
+>SUC04 QUV00,9,147 QCT20,7,5 QCT21,7,5 QCT22,7,5 QCT23,7,5 QCT24,7,5<
+
+//05 - Complemento da Ignição OFF Tempos de Entradas Digitais (Implementa a UC6)
+>SUC05 QUV06,9,200 QCT30,7,5 QCT31,7,5 QCT32,7,5 QCT33,7,5 QCT34,7,5<
+
+//06 - Faixas de Velocidade
+>SUC06 PLN0.1,4,3 QIM,4,12 QCT40,7,5 QCT41,7,5 QCT42,7,5 QCT43,7,5 QCT44,7,5 QCT45,7,5 QCT46,7,5 QCT47,7,5<
+
+//07 - Inicio de Infracao
+>SUC07 QUV00,9,147 QCT54,7,10<
+
+//08 - Fim da Infração
+>SUC08 QUV00,9,147 QCT50,7,6 QCT51,7,6 QCT52,7,6 QCT53,7,6<
+
+//09 - Freada e Aceleração
+>SUC09 QUV00,9,147 QCT55,7,10 QCT54,7,10<
+
+//---------------------------------------------------------------------------
+//Prepara os dados para Discreta Virtual 1 a 4
+//CT78 D1D2D3D4
+//D1 (CT80) = SCT78 |VCT80&HFF*16777216 (Limpador)
+//D2 (CT81) = SCT78 |VCT81&HFF*65536    (Freio)
+//D3 (CT82) = SCT78 |VCT82&HFF*256		(Farol)
+//D4 (CT83) = SCT78 |VCT83&HFF			(Cinto)
+//Caso não tenha a discreta substituir por SCT78 |FF*x, onde x é correspondente a discreta
+>SED10 TT00++ +- SGN NN {SCT78 0}{SCT78 |HFF}{SCT78 |VCT82&HFF*256}<
+>SED11 TT00++ +- SGN NN {SCT78 |VCT81&HFF*65536}{SCT78 |HFF*16777216}<
+
+//Prepara os dados para Discreta Virtual 5 a 8
+//CT79 D5D6D7D8
+//D1 (CT84) = SCT79 |VCT84&HFF*16777216
+//D2 (CT85) = SCT79 |VCT85&HFF*65536
+//D3 (CT86) = SCT79 |VCT86&HFF*256
+//D4 (CT87) = SCT79 |VCT87&HFF
+//Caso não tenha a discreta substituir por SCT789 |FF*x, onde x é correspondente a discreta
+//>SED12 TT00++ +- SGN NN {SCT79 0}{SCT79 |VCT87&HFF}{SCT79 |VCT86&HFF*256}<
+//>SED13 TT00++ +- SGN NN {SCT79 |VCT85&HFF*65536}{SCT79 |VCT84&HFF*16777216}<
+>SED12 TT00++ +- SGN NN {SCT79 HFFFFFFFF}}<
+>SED13U<
+
+//----------------------------------------------------------------------------
+
+>SED93 TT00++ IN07++||UC15++ SGN NN {SCC15 120}<
+
+//Em caso de falha de RAM, posiona o ponteiro de logger na última posição
+>SED94 RT63++ +- SGN NN {QDLS311229235959}<
+
+//Armazena Versao,Vel, RPM
+>SED95 TT00++ SG13++&&CL15-- LOG AX {PLN03,4,2 GVDVCT64,14,3 QCT27_6D,9,3}<
+
+//Armazena Discreta Virtual 1
+>SED96 TT00++ SG13++&&CL15-- LOG AX {GVHVCT78,10,8}<
+
+//Armazena Discreta Virtual 2
+>SED97 TT00++ SG13++&&CL15-- LOG AX {GVHVCT79,10,8}<
+
+//Armazena GP
+>SED98 TT00++ SG13++&&CL15-- LOG GP<
+
+//Armazena Hodometro
+>SED99 TT00++ SG13++&&CL15-- LOG AX {QCT01,7,10}<
+
+
+
+//*************************
+//*  Habilita CAN         *
+//*************************
+
+>C19_ENA1_BRP0500<
+>STP02 Toyota_Corolla_2013_BETA2.170419<
+>SED60U<
+>SED66U<
+>SCC58 5<
+>SSO<
