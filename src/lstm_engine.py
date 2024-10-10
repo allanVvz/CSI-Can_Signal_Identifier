@@ -30,7 +30,7 @@ def carregar_modelo(nome_arquivo):
         print(f"Erro ao carregar o modelo: {e}")
         return None
 
-def process_data(hex_data):
+def process_data(hex_data, scaler_filename='scaler.pkl'):
     # Verifica se a entrada é uma string
     if isinstance(hex_data, str):
         byte_list = hex_data.split(' ')
@@ -42,12 +42,20 @@ def process_data(hex_data):
         # Converte os valores de hexadecimal para decimal
         byte_list = [int(byte, 16) for byte in byte_list]
 
-        # # Normaliza os valores usando o StandardScaler
-        # scaler = StandardScaler()
-        # byte_list = np.array(byte_list).reshape(-1, 1)  # Ajusta o formato para o scaler
-        # byte_list = scaler.fit_transform(byte_list).flatten()  # Aplica normalização e achata para 1D
+        # Procura o scaler na pasta raiz
+        scaler_path = os.path.join(os.getcwd(), scaler_filename)
+        if not os.path.exists(scaler_path):
+            raise FileNotFoundError(f"O arquivo {scaler_filename} não foi encontrado na pasta raiz.")
 
-        return byte_list  # Retorna a lista para ser expandida em colunas
+        # Carrega o scaler salvo
+        with open(scaler_path, 'rb') as f:
+            scaler = pickle.load(f)
+
+        # Normaliza os valores usando o scaler carregado
+        byte_array = np.array(byte_list).reshape(-1, 1)  # Ajusta o formato para o scaler
+        byte_list_scaled = scaler.transform(byte_array).flatten()  # Aplica normalização e achata para 1D
+
+        return byte_list_scaled  # Retorna a lista para ser expandida em colunas
     else:
         raise ValueError("A entrada deve ser uma string hexadecimal.")
 
@@ -103,7 +111,7 @@ def analyse_archive(self):
 
     return data_df
 
-def prepare_sequences(data_df, target_size=1200):
+def prepare_sequences(data_df, target_size=900):
     validated_pgns = []
 
     for index, row in data_df.iterrows():
@@ -278,3 +286,24 @@ def process_best_pgns(best_pgns):
             print(f"PGN {pgn_number}, {byte_column} descartado por ter {num_peaks} picos.")
 
     return processed_pgns
+
+
+def aplicar_scaler_salvo(byte_list, scaler_filename='scaler.pkl'):
+    # Procura o scaler na pasta raiz
+    scaler_path = os.path.join(os.getcwd(), scaler_filename)
+
+    if not os.path.exists(scaler_path):
+        print(f"Erro: O arquivo {scaler_filename} não foi encontrado na pasta raiz.")
+        return None
+
+    # Carrega o scaler salvo
+    with open(scaler_path, 'rb') as f:
+        scaler = pickle.load(f)
+
+    # Converte byte_list em um array NumPy e ajusta a forma
+    byte_array = np.array(byte_list).reshape(-1, 1)
+
+    # Aplica apenas o transform
+    byte_list_scaled = scaler.transform(byte_array).flatten()
+
+    return byte_list_scaled

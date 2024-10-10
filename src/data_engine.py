@@ -211,17 +211,6 @@ def load_selected_file(selected_file, directory = "CANDataChunks"):
 
 
 
-# def create_dropdown_menu(root, file_list, callback):
-#     selected_file = tk.StringVar()
-#     dropdown = ttk.Combobox(root, textvariable=selected_file, values=file_list)
-#     dropdown.pack(pady=10)
-#
-#     # Adicionar botão para carregar o arquivo selecionado
-#     load_button = tk.Button(root, text="Carregar arquivo", command=lambda: callback(selected_file.get()))
-#     load_button.pack(pady=5)
-#
-#     return dropdown
-
 def gerar_pdf_com_graficos(best_results, pdf_filename="graficos_pgn.pdf"):
     """
     Gera um arquivo PDF contendo todos os gráficos a partir dos dados do DataFrame best_results.

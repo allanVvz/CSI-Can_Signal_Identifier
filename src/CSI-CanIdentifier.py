@@ -326,7 +326,7 @@ class AplicacaoCSV:
             return
 
         # Etapa 2: Ajustar as sequências para o tamanho desejado
-        validated_df = prepare_sequences(data_df, target_size=1200)
+        validated_df = prepare_sequences(data_df, target_size=900)
         if validated_df is None:
             return
 
