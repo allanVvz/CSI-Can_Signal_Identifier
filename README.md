@@ -1,6 +1,6 @@
-# CANProtocolMLScanner
+# CSI | Can Sequence Identificator
 
-**Creare Sistemas** presents **CANProtocolMLScanner**, a sophisticated tool for analyzing and detecting key communication signals within vehicles using the **CAN (Controller Area Network)** protocol. By leveraging advanced machine learning algorithms, this tool is designed to identify and monitor critical features such as odometer readings, RPM, and dashboard communications.  
+**Creare Sistemas** presents **Can Sequence Identificator**, a sophisticated tool for analyzing and detecting key communication signals within vehicles using the **CAN (Controller Area Network)** protocol. By leveraging advanced machine learning algorithms, this tool is designed to identify and monitor critical features such as odometer readings, RPM, and dashboard communications.  
 
 ## Supported Features and Signals
 
