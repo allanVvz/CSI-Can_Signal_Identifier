@@ -44,7 +44,7 @@ class AplicacaoCSV:
         # Botão "Carregar dados"
         self.btn_load = tk.Button(
             self.header_frame,
-            text=" IXXAT.CSV",
+            text=" Ixxt (.csv)",
             command=lambda: ui_load_ixxt_archive(self),
             width=15,
             height=2,
@@ -56,7 +56,7 @@ class AplicacaoCSV:
         # Botão "Carregar dados"
         self.btn_load = tk.Button(
             self.header_frame,
-            text="Simple Can.txt",
+            text="Simple Can (.txt)",
             command=lambda: ui_load_can_archive(self),
             width=15,
             height=2,
@@ -68,7 +68,7 @@ class AplicacaoCSV:
         # Botão "Carregar dados"
         self.btn_load = tk.Button(
             self.header_frame,
-            text="MicroShip.txt",
+            text="MicroChip (.txt)",
             command=lambda: ui_load_ms_archive(self),
             width=15,
             height=2,
@@ -267,7 +267,7 @@ class AplicacaoCSV:
         if df is not None:
             self.can_data = df  # Armazena o DataFrame carregado
             self.nome_arquivo = selected_file  # Atualiza o nome do arquivo
-            self.master.title(f"Can Machine Learn Scanner - {self.nome_arquivo}")  # Atualiza o título da janela
+            self.master.title(f"Can Machine Learn Scanner | Carregado | {self.nome_arquivo}")  # Atualiza o título da janela
 
 
     def exibir_dataframe(self):
@@ -301,6 +301,8 @@ class AplicacaoCSV:
             messagebox.showwarning("Aviso", "Nenhum dado carregado para usar o modelo.")
             return
 
+        self.master.title(f"Can Machine Learn Scanner | Analisado | {self.nome_arquivo}")  # Atualiza o título da janela
+
         # Obtém o diretório base, independentemente se for um executável ou um script Python
         base_path = self.get_base_path()
 
@@ -313,7 +315,7 @@ class AplicacaoCSV:
             return
 
         # Construa o caminho completo para o arquivo do modelo
-        model_filename = os.path.join(directory, 'DeepTimeSeries_Sqr_V2')
+        model_filename = os.path.join(directory, 'DeepTimeSeries_Sqr_V2.pkl')
 
         # Carregar o modelo
         model = self.carregar_modelo(model_filename)
