@@ -19,9 +19,8 @@ def ui_load_ixxt_archive(self):
     )
 
     if file_path:
-        self.nome_arquivo = file_path  # Armazena o nome do arquivo analisado
+        self.nome_arquivo = os.path.basename(file_path)  # **Modificação Importante**
         self.can_data = ixxt_filetodataframe(file_path)
-        self.nome_arquivo = file_path  # Atualiza o nome do arquivo
         self.master.title(f"Can Machine Learn Scanner | Carregado | {self.nome_arquivo}")  # Atualiza o título da janela
 
         messagebox.showinfo("Sucesso", f"Arquivo '{file_path}' carregado com sucesso!")
@@ -38,7 +37,6 @@ def ui_load_ms_archive(self):
     )
     if file_path:
         self.nome_arquivo = os.path.basename(file_path)  # **Modificação Importante**
-        self.nome_arquivo = file_path
         self.can_data = ms_filetodataframe(file_path)  # Carrega os dados do arquivo
         self.master.title(f"Can Machine Learn Scanner | Carregado | {self.nome_arquivo}")  # Atualiza o título da janela
         messagebox.showinfo("Sucesso", f"Arquivo '{file_path}' carregado com sucesso!")
@@ -54,9 +52,8 @@ def ui_load_can_archive(self):
         filetypes=(("txt files", "*.txt"), ("TXT files", "*.txt"), ("all files", "*.*"))
     )
     if file_path:
-        self.nome_arquivo = file_path
+        self.nome_arquivo = os.path.basename(file_path)  # **Modificação Importante**
         self.can_data = can_filetodataframe(file_path)  # Carrega os dados do arquivo
-        self.nome_arquivo = file_path  # Atualiza o nome do arquivo
         self.master.title(f"Can Machine Learn Scanner | Carregado | {self.nome_arquivo}")  # Atualiza o título da janela
         if self.can_data is not None:
             messagebox.showinfo("Sucesso", f"Arquivo '{file_path}' carregado com sucesso!")
