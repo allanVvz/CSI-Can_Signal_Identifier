@@ -313,7 +313,7 @@ class AplicacaoCSV:
             return
 
         # Construa o caminho completo para o arquivo do modelo
-        model_filename = os.path.join(directory, 'DeepTimeSeries_Sqr_V1.pkl')
+        model_filename = os.path.join(directory, 'DeepTimeSeries_Sqr_V2')
 
         # Carregar o modelo
         model = self.carregar_modelo(model_filename)
