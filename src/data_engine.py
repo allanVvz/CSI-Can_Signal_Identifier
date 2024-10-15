@@ -124,8 +124,8 @@ def ms_filetodataframe(file_path):
         for i in range(1, 9):
             df[f'byte_{i}'] = df[f'byte_{i}'].apply(lambda x: int(x, 16) if is_valid_hex(x) else 0)
 
-        # Converter o PGN de hexadecimal para decimal
-        df['pgn'] = df['pgn'].apply(lambda x: int(x, 16) if is_valid_hex(x) else 0)
+        # # Converter o PGN de hexadecimal para decimal
+        # df['pgn'] = df['pgn'].apply(lambda x: int(x, 16) if is_valid_hex(x) else 0)
 
         return df
 
@@ -164,12 +164,12 @@ def can_filetodataframe(file_path):
             if len(parts) < 5:
                 continue
 
-            # Extrair o ID (hexadecimal) e convertê-lo para decimal
-            pgn_hex = parts[1]  # ID(hex)
-            try:
-                pgn_decimal = int(pgn_hex, 16)  # Converte para decimal
-            except ValueError:
-                pgn_decimal = 0  # Definir como 0 se a conversão falhar
+            # # Extrair o ID (hexadecimal) e convertê-lo para decimal
+            #pgn_hex = parts[1]  # ID(hex)
+            # try:
+            #     pgn_decimal = int(pgn_hex, 16)  # Converte para decimal
+            # except ValueError:
+            #     pgn_decimal = 0  # Definir como 0 se a conversão falhar
 
             # Extrair os bytes da coluna 'Data (hex)'
             byte_values = parts[4:12]  # Extraindo os 8 bytes reais
@@ -179,7 +179,7 @@ def can_filetodataframe(file_path):
                 byte_values.extend(['00'] * (8 - len(byte_values)))
 
             # Adicionar a linha processada (PGN + 8 bytes)
-            data.append([pgn_decimal] + byte_values[:8])  # Garantir que tenha no máximo 8 bytes
+            data.append([parts[1]] + byte_values[:8])  # Garantir que tenha no máximo 8 bytes
 
         # Converter a lista de dados em um DataFrame
         df = pd.DataFrame(data, columns=['pgn', 'byte_1', 'byte_2', 'byte_3', 'byte_4',

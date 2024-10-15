@@ -343,6 +343,9 @@ class AplicacaoCSV:
         # Armazenar os resultados finais
         self.best_results = final_results_df
 
+        # Ordenar os resultados por acurácia decrescente
+        self.best_results = self.best_results.sort_values(by='accuracy', ascending=False).reset_index(drop=True)
+
         # Exibir os resultados finais no terminal
         self.exibir_resultados_finais(final_results_df)
 
